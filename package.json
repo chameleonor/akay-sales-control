@@ -1,0 +1,36 @@
+{
+  "name": "vertigo",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "bun check && vite build",
+    "check": "tsc && biome check --write ./src"
+  },
+  "dependencies": {
+    "@fontsource/pt-sans": "^5.1.0",
+    "@tanstack/react-router": "^1.62.0",
+    "@tanstack/router-devtools": "^1.62.0",
+    "jotai": "^2.10.0",
+    "lucide-react": "^0.396.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "tailwind-merge": "^2.5.3",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.8.1",
+    "@swc/core": "^1.7.26",
+    "@tanstack/router-vite-plugin": "^1.62.0",
+    "@types/react": "^18.3.11",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react-swc": "^3.7.1",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.47",
+    "tailwindcss": "^3.4.13",
+    "typescript": "^5.6.2",
+    "vite": "^5.4.8",
+    "vite-tsconfig-paths": "^4.3.2"
+  }
+}
