@@ -19,8 +19,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./src/*"]
+      "@stores/*": ["stores/*"],
+      "@components/*": ["components/*"],
+      "@routes/*": ["routes/*"],
     }
   },
   "include": ["src"],

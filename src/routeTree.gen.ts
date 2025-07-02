@@ -11,15 +11,15 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as ReceitasRouteImport } from './routes/receitas'
 
+const ReceitasLazyRouteImport = createFileRoute('/receitas')()
 const IndexLazyRouteImport = createFileRoute('/')()
 
-const ReceitasRoute = ReceitasRouteImport.update({
+const ReceitasLazyRoute = ReceitasLazyRouteImport.update({
   id: '/receitas',
   path: '/receitas',
   getParentRoute: () => rootRouteImport,
-} as any)
+} as any).lazy(() => import('./routes/receitas.lazy').then((d) => d.Route))
 const IndexLazyRoute = IndexLazyRouteImport.update({
   id: '/',
   path: '/',
@@ -28,16 +28,16 @@ const IndexLazyRoute = IndexLazyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
-  '/receitas': typeof ReceitasRoute
+  '/receitas': typeof ReceitasLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
-  '/receitas': typeof ReceitasRoute
+  '/receitas': typeof ReceitasLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
-  '/receitas': typeof ReceitasRoute
+  '/receitas': typeof ReceitasLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -49,7 +49,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
-  ReceitasRoute: typeof ReceitasRoute
+  ReceitasLazyRoute: typeof ReceitasLazyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -58,7 +58,7 @@ declare module '@tanstack/react-router' {
       id: '/receitas'
       path: '/receitas'
       fullPath: '/receitas'
-      preLoaderRoute: typeof ReceitasRouteImport
+      preLoaderRoute: typeof ReceitasLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -73,7 +73,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
-  ReceitasRoute: ReceitasRoute,
+  ReceitasLazyRoute: ReceitasLazyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,14 +1,11 @@
-import React from 'react';
-import { createFileRoute } from '@tanstack/react-router'
+import React from "react";
+import { useAtom } from 'jotai';
+import { estoqueAtom, ProdutoEstoque } from '@stores/estoqueAtom';
 
-export const Route = createFileRoute('/receitas')({
-  component: RouteComponent,
-})
+export type Receita = { id: number; nome: string; itens?: ReceitaItem[] };
+export type ReceitaItem = { id: number; nome: string; quantidade: number };
 
-type Receita = { id: number; nome: string; itens?: ReceitaItem[] };
-type ReceitaItem = { id: number; nome: string; quantidade: number };
-
-function ReceitaForm({
+export function ReceitaForm({
   receita,
   onSave,
   onCancel,
@@ -19,6 +16,7 @@ function ReceitaForm({
 }) {
   const [nome, setNome] = React.useState(receita.nome);
   const [itens, setItens] = React.useState<ReceitaItem[]>(receita.itens ?? []);
+  const [estoque] = useAtom(estoqueAtom);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,7 +26,7 @@ function ReceitaForm({
   function handleAddItem() {
     setItens([
       ...itens,
-      { id: Date.now(), nome: '', quantidade: 1 }
+      { id: Date.now(), nome: estoque[0]?.nome || '', quantidade: 1 }
     ]);
   }
 
@@ -72,12 +70,15 @@ function ReceitaForm({
       <ul>
         {itens.map((item, idx) => (
           <li key={item.id} className="flex gap-2 items-center mb-2">
-            <input
+            <select
               className="border rounded px-2 py-1 flex-1"
-              placeholder="Nome do item"
               value={item.nome}
               onChange={e => handleItemChange(idx, 'nome', e.target.value)}
-            />
+            >
+              {estoque.map(produto => (
+                <option key={produto.id} value={produto.nome}>{produto.nome} ({produto.unidade})</option>
+              ))}
+            </select>
             <input
               className="border rounded px-2 py-1 w-20"
               type="number"
@@ -105,77 +106,5 @@ function ReceitaForm({
         <button type="button" className="bg-gray-200 px-3 py-1 rounded" onClick={onCancel}>Cancelar</button>
       </div>
     </form>
-  );
-}
-
-function RouteComponent() {
-  // Mock de receitas
-  const [receitas, setReceitas] = React.useState<Receita[]>([
-    { id: 1, nome: 'Bolo de Chocolate' },
-    { id: 2, nome: 'Pão de Queijo' },
-    { id: 3, nome: 'Torta de Frango' },
-  ]);
-  const [menuOpen, setMenuOpen] = React.useState<number | null>(null);
-  const [editId, setEditId] = React.useState<number | null>(null);
-
-  function handleSaveEdit(updated: Receita) {
-    setReceitas(rs => rs.map(r => (r.id === updated.id ? updated : r)));
-    setEditId(null);
-  }
-
-  return (
-    <div className="flex max-w-4xl mx-auto mt-8">
-      <div className="flex-1">
-        <h1 className="text-2xl font-bold mb-4">Receitas</h1>
-        <ul className="divide-y divide-gray-200 bg-white rounded shadow">
-          {receitas.map((receita) => (
-            <li key={receita.id} className="flex items-center justify-between px-4 py-3 hover:bg-gray-50">
-              <span>{receita.nome}</span>
-              <div className="relative">
-                <button
-                  className="p-2 rounded-full hover:bg-gray-200"
-                  onClick={() => setMenuOpen(menuOpen === receita.id ? null : receita.id)}
-                >
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <circle cx="5" cy="12" r="2"/>
-                    <circle cx="12" cy="12" r="2"/>
-                    <circle cx="19" cy="12" r="2"/>
-                  </svg>
-                </button>
-                {menuOpen === receita.id && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10">
-                    <button
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                      onClick={() => {
-                        setEditId(receita.id);
-                        setMenuOpen(null);
-                      }}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-                      onClick={() => {
-                        setReceitas(rs => rs.filter(r => r.id !== receita.id));
-                        setMenuOpen(null);
-                      }}
-                    >
-                      Deletar
-                    </button>
-                  </div>
-                )}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-      {editId !== null && (
-        <ReceitaForm
-          receita={receitas.find(r => r.id === editId)!}
-          onSave={handleSaveEdit}
-          onCancel={() => setEditId(null)}
-        />
-      )}
-    </div>
   );
 }

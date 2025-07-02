@@ -5,7 +5,7 @@ import ReactDOM from "react-dom/client";
 import "@fontsource/pt-sans/400.css";
 import "@fontsource/pt-sans/700.css";
 
-import "@/globals.css";
+import "globals.css";
 
 // routing
 import { RouterProvider, createRouter } from "@tanstack/react-router";
