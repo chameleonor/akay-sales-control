@@ -1,6 +1,6 @@
 import React from "react";
 import { useAtom } from 'jotai';
-import { estoqueAtom, ProdutoEstoque } from '@stores/estoqueAtom';
+import { estoqueAtom } from '@stores/estoqueAtom';
 
 export type Receita = { id: number; nome: string; itens?: ReceitaItem[] };
 export type ReceitaItem = { id: number; nome: string; quantidade: number };
