@@ -1,6 +1,6 @@
 import React from "react";
 import { useAtom } from 'jotai';
-import { estoqueAtom } from '@stores/estoqueAtom';
+import { primarioAtom } from '@stores/primarioAtom';
 
 export type Receita = { id: number; nome: string; itens?: ReceitaItem[] };
 export type ReceitaItem = { id: number; nome: string; quantidade: number };
@@ -16,7 +16,7 @@ export function ReceitaForm({
 }) {
   const [nome, setNome] = React.useState(receita.nome);
   const [itens, setItens] = React.useState<ReceitaItem[]>(receita.itens ?? []);
-  const [estoque] = useAtom(estoqueAtom);
+  const [estoque] = useAtom(primarioAtom);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -14,6 +14,7 @@ export default defineConfig({
 			"@components": "/src/components",
 			"@routes": "/src/routes",
 			"@utils": "/src/utils",
+			"@types": "/src/types",
 		},
 	},
 });

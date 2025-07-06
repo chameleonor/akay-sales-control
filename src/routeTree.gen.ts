@@ -13,6 +13,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRouteImport } from './routes/__root'
 
 const ReceitasLazyRouteImport = createFileRoute('/receitas')()
+const EstoqueLazyRouteImport = createFileRoute('/estoque')()
 const IndexLazyRouteImport = createFileRoute('/')()
 
 const ReceitasLazyRoute = ReceitasLazyRouteImport.update({
@@ -20,6 +21,11 @@ const ReceitasLazyRoute = ReceitasLazyRouteImport.update({
   path: '/receitas',
   getParentRoute: () => rootRouteImport,
 } as any).lazy(() => import('./routes/receitas.lazy').then((d) => d.Route))
+const EstoqueLazyRoute = EstoqueLazyRouteImport.update({
+  id: '/estoque',
+  path: '/estoque',
+  getParentRoute: () => rootRouteImport,
+} as any).lazy(() => import('./routes/estoque.lazy').then((d) => d.Route))
 const IndexLazyRoute = IndexLazyRouteImport.update({
   id: '/',
   path: '/',
@@ -28,27 +34,31 @@ const IndexLazyRoute = IndexLazyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexLazyRoute
+  '/estoque': typeof EstoqueLazyRoute
   '/receitas': typeof ReceitasLazyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexLazyRoute
+  '/estoque': typeof EstoqueLazyRoute
   '/receitas': typeof ReceitasLazyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexLazyRoute
+  '/estoque': typeof EstoqueLazyRoute
   '/receitas': typeof ReceitasLazyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/receitas'
+  fullPaths: '/' | '/estoque' | '/receitas'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/receitas'
-  id: '__root__' | '/' | '/receitas'
+  to: '/' | '/estoque' | '/receitas'
+  id: '__root__' | '/' | '/estoque' | '/receitas'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexLazyRoute: typeof IndexLazyRoute
+  EstoqueLazyRoute: typeof EstoqueLazyRoute
   ReceitasLazyRoute: typeof ReceitasLazyRoute
 }
 
@@ -59,6 +69,13 @@ declare module '@tanstack/react-router' {
       path: '/receitas'
       fullPath: '/receitas'
       preLoaderRoute: typeof ReceitasLazyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/estoque': {
+      id: '/estoque'
+      path: '/estoque'
+      fullPath: '/estoque'
+      preLoaderRoute: typeof EstoqueLazyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -73,6 +90,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexLazyRoute: IndexLazyRoute,
+  EstoqueLazyRoute: EstoqueLazyRoute,
   ReceitasLazyRoute: ReceitasLazyRoute,
 }
 export const routeTree = rootRouteImport
