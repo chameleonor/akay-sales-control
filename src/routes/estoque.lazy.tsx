@@ -5,7 +5,10 @@ import { primarioAtom } from '@stores/primarioAtom';
 import { propriedadesAtom } from '@stores/propriedadesAtom';
 import { corantesAtom } from '@stores/corantesAtom';
 import { essenciasAtom } from '@stores/essenciasAtom';
+import { acabamentosAtom } from '@stores/acabamentosAtom';
+import { embalagensAtom } from '@stores/embalagensAtom';
 import { ProdutoForm } from '@components/ProdutoForm';
+import { ProdutoCard } from '@components/ProdutoCard';
 import type { ProdutoPrimario } from '@types/ProdutoPrimario';
 
 export const Route = createLazyFileRoute('/estoque')({
@@ -17,6 +20,8 @@ const TABS = [
   { key: 'propriedades', label: 'Propriedades', atom: propriedadesAtom },
   { key: 'corantes', label: 'Corantes', atom: corantesAtom },
   { key: 'essencias', label: 'Essências', atom: essenciasAtom },
+  { key: 'acabamentos', label: 'Acabamentos', atom: acabamentosAtom },
+  { key: 'embalagens', label: 'Embalagens', atom: embalagensAtom },
 ];
 
 function RouteComponent() {
@@ -46,6 +51,8 @@ function RouteComponent() {
   const [, setItemsPropriedades] = useAtom(propriedadesAtom);
   const [, setItemsCorantes] = useAtom(corantesAtom);
   const [, setItemsEssencias] = useAtom(essenciasAtom);
+  const [, setItemsAcabamentos] = useAtom(acabamentosAtom);
+  const [, setItemsEmbalagens] = useAtom(embalagensAtom);
 
   return (
     <div className="w-full px-4 mt-8">
@@ -111,6 +118,26 @@ function RouteComponent() {
               >
                 Essência
               </button>
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                onClick={() => {
+                  setActiveTab('acabamentos');
+                  setShowNew(true);
+                  setMenuOpen(null);
+                }}
+              >
+                Acabamento
+              </button>
+              <button
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                onClick={() => {
+                  setActiveTab('embalagens');
+                  setShowNew(true);
+                  setMenuOpen(null);
+                }}
+              >
+                Embalagem
+              </button>
             </div>
           )}
         </div>
@@ -154,67 +181,29 @@ function RouteComponent() {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
         {filteredItems.map((item: ProdutoPrimario) => (
-          <div key={item.id} className="bg-white rounded shadow flex flex-row p-4 relative group hover:shadow-lg transition min-h-[100px]">
-            <div className="w-24 h-24 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center overflow-hidden border mr-4">
-              <img
-                src={item.imagem && item.imagem.trim() !== '' ? item.imagem : `https://source.unsplash.com/120x120/?${encodeURIComponent(item.produto)}`}
-                alt={item.produto}
-                className="object-cover w-full h-full"
-                onError={e => (e.currentTarget.src = '')}
-              />
-            </div>
-            <div className="flex-1 flex flex-col justify-between">
-              <div>
-                <div className="font-semibold text-lg text-gray-800">{item.produto}</div>
-                <div className="text-gray-500 text-sm mb-1">{item.peso} {item.medida} • {item.quantidade} un.</div>
-                <div className="flex flex-wrap gap-2 text-xs text-gray-600 mt-1">
-                  <span>Preço: R$ {item.preco.toFixed(2)}</span>
-                </div>
-              </div>
-              <div className="relative self-end mt-2">
-                <button
-                  className="p-2 rounded-full hover:bg-gray-200"
-                  onClick={() => setMenuOpen(menuOpen === item.id ? null : item.id)}
-                >
-                  <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <circle cx="5" cy="12" r="2"/>
-                    <circle cx="12" cy="12" r="2"/>
-                    <circle cx="19" cy="12" r="2"/>
-                  </svg>
-                </button>
-                {menuOpen === item.id && (
-                  <div className="absolute right-0 mt-2 w-32 bg-white border rounded shadow z-10">
-                    <button
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                      onClick={() => {
-                        setEditId(item.id);
-                        setMenuOpen(null);
-                      }}
-                    >
-                      Editar
-                    </button>
-                    <button
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-                      onClick={() => {
-                        if (activeTab === 'primario') {
-                          setItemsPrimario((es: ProdutoPrimario[]) => es.filter(e => e.id !== item.id));
-                        } else if (activeTab === 'propriedades') {
-                          setItemsPropriedades((es: ProdutoPrimario[]) => es.filter(e => e.id !== item.id));
-                        } else if (activeTab === 'corantes') {
-                          setItemsCorantes((es: ProdutoPrimario[]) => es.filter(e => e.id !== item.id));
-                        } else if (activeTab === 'essencias') {
-                          setItemsEssencias((es: ProdutoPrimario[]) => es.filter(e => e.id !== item.id));
-                        }
-                        setMenuOpen(null);
-                      }}
-                    >
-                      Deletar
-                    </button>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+          <ProdutoCard
+            key={item.id}
+            item={item}
+            menuOpen={menuOpen}
+            setMenuOpen={setMenuOpen}
+            onEdit={setEditId}
+            onDelete={id => {
+              if (activeTab === 'primario') {
+                setItemsPrimario((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
+              } else if (activeTab === 'propriedades') {
+                setItemsPropriedades((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
+              } else if (activeTab === 'corantes') {
+                setItemsCorantes((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
+              } else if (activeTab === 'essencias') {
+                setItemsEssencias((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
+              } else if (activeTab === 'acabamentos') {
+                setItemsAcabamentos((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
+              } else if (activeTab === 'embalagens') {
+                setItemsEmbalagens((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
+              }
+              setMenuOpen(null);
+            }}
+          />
         ))}
       </div>
       {showNew && (
@@ -253,6 +242,20 @@ function RouteComponent() {
               <ProdutoForm
                 titulo="Essência"
                 setItems={setItemsEssencias}
+                onCancel={() => setShowNew(false)}
+              />
+            )}
+            {activeTab === 'acabamentos' && (
+              <ProdutoForm
+                titulo="Acabamento"
+                setItems={setItemsAcabamentos}
+                onCancel={() => setShowNew(false)}
+              />
+            )}
+            {activeTab === 'embalagens' && (
+              <ProdutoForm
+                titulo="Embalagem"
+                setItems={setItemsEmbalagens}
                 onCancel={() => setShowNew(false)}
               />
             )}
@@ -318,6 +321,32 @@ function RouteComponent() {
                   setItemsEssencias((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
                   setEditId(null);
                   setActiveTab('essencias');
+                }}
+                onCancel={() => setEditId(null)}
+              />
+            )}
+            {activeTab === 'acabamentos' && (
+              <ProdutoForm
+                titulo="Acabamento"
+                setItems={setItemsAcabamentos}
+                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
+                onSave={item => {
+                  setItemsAcabamentos((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
+                  setEditId(null);
+                  setActiveTab('acabamentos');
+                }}
+                onCancel={() => setEditId(null)}
+              />
+            )}
+            {activeTab === 'embalagens' && (
+              <ProdutoForm
+                titulo="Embalagem"
+                setItems={setItemsEmbalagens}
+                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
+                onSave={item => {
+                  setItemsEmbalagens((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
+                  setEditId(null);
+                  setActiveTab('embalagens');
                 }}
                 onCancel={() => setEditId(null)}
               />
