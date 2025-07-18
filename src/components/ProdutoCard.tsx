@@ -1,5 +1,4 @@
-import React from 'react';
-import type { ProdutoPrimario } from '../types/ProdutoPrimario';
+import type { ProdutoPrimario } from '@types/ProdutoPrimario';
 
 interface ProdutoCardProps {
   item: ProdutoPrimario;

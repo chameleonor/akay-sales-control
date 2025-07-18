@@ -4,8 +4,6 @@ import sqlite3 from 'sqlite3';
 const router = Router();
 const db = new sqlite3.Database('akay-sales.db');
 
-// Cria a tabela se não existir
-// (Idealmente, isso deveria estar em outro lugar, mas mantido aqui por simplicidade)
 db.run(`
   CREATE TABLE IF NOT EXISTS pedidos (
     id INTEGER PRIMARY KEY,

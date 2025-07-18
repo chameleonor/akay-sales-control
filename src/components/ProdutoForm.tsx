@@ -20,6 +20,7 @@ export function ProdutoForm({ item, onSave, onCancel, setItems, titulo, showImag
       medida: 'g',
       preco: 0,
       quantidade: 1,
+      quantidadeAtual: 1,
       periodo: '',
       vencimento: '',
       imagem: '',
@@ -112,6 +113,16 @@ export function ProdutoForm({ item, onSave, onCancel, setItems, titulo, showImag
             className="border rounded px-2 py-1"
             value={form.quantidade === 0 ? '' : form.quantidade}
             onChange={e => handleChange('quantidade', e.target.value === '' ? 0 : Number(e.target.value))}
+            min={0}
+          />
+        </label>
+        <label className="flex flex-col w-28 min-w-[110px]">
+          <span className="text-xs text-gray-600 mb-1">Quantidade Atual</span>
+          <input
+            type="number"
+            className="border rounded px-2 py-1"
+            value={form.quantidadeAtual === 0 ? '' : form.quantidadeAtual}
+            onChange={e => handleChange('quantidadeAtual', e.target.value === '' ? 0 : Number(e.target.value))}
             min={0}
           />
         </label>
