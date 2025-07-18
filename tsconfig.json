@@ -25,6 +25,8 @@
       "@components/*": ["components/*"],
       "@routes/*": ["routes/*"],
       "@types/*": ["types/*"],
+      "@db/*": ["db/*"],
+      "@constants": ["constants.ts"]
     }
   },
   "include": ["src"],

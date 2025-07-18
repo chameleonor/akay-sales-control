@@ -1,0 +1,62 @@
+import { Router } from 'express';
+import sqlite3 from 'sqlite3';
+
+const router = Router();
+const db = new sqlite3.Database('akay-sales.db');
+
+// Cria a tabela se não existir
+// (Idealmente, isso deveria estar em outro lugar, mas mantido aqui por simplicidade)
+db.run(`
+  CREATE TABLE IF NOT EXISTS pedidos (
+    id INTEGER PRIMARY KEY,
+    data TEXT,
+    receitas TEXT
+  )
+`);
+
+// Listar todos os pedidos
+router.get('/pedidos', (req, res) => {
+  db.all('SELECT * FROM pedidos', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json(rows.map(row => ({
+      ...row,
+      receitas: JSON.parse(row.receitas)
+    })));
+  });
+});
+
+// Criar novo pedido
+router.post('/pedidos', (req, res) => {
+  const { id, data, receitas } = req.body;
+  db.run(
+    'INSERT INTO pedidos (id, data, receitas) VALUES (?, ?, ?)',
+    [id, data, JSON.stringify(receitas)],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id, data, receitas });
+    }
+  );
+});
+
+// Atualizar pedido
+router.put('/pedidos/:id', (req, res) => {
+  const { data, receitas } = req.body;
+  db.run(
+    'UPDATE pedidos SET data = ?, receitas = ? WHERE id = ?',
+    [data, JSON.stringify(receitas), req.params.id],
+    function (err) {
+      if (err) return res.status(500).json({ error: err.message });
+      res.json({ id: req.params.id, data, receitas });
+    }
+  );
+});
+
+// Deletar pedido
+router.delete('/pedidos/:id', (req, res) => {
+  db.run('DELETE FROM pedidos WHERE id = ?', [req.params.id], function (err) {
+    if (err) return res.status(500).json({ error: err.message });
+    res.json({ success: true });
+  });
+});
+
+export default router;

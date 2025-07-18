@@ -19,6 +19,13 @@ export const Route = createRootRoute({
 					Receitas
 					<span className="absolute left-0 -bottom-1 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
 				</Link>
+				<Link
+					to="/pedidos"
+					className="relative text-lg text-gray-700 hover:text-blue-600 transition group"
+				>
+					Pedidos
+					<span className="absolute left-0 -bottom-1 w-full h-0.5 bg-blue-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+				</Link>
 			</div>
 
 			<Outlet />

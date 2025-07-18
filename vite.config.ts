@@ -15,6 +15,8 @@ export default defineConfig({
 			"@routes": "/src/routes",
 			"@utils": "/src/utils",
 			"@types": "/src/types",
+			"@db": "/src/db",
+			"@constants": "/src/constants.ts",
 		},
 	},
 });

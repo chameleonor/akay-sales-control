@@ -23,6 +23,7 @@ export function ProdutoCard({ item, onEdit, onDelete, menuOpen, setMenuOpen }: P
       <div className="flex-1 flex flex-col justify-between">
         <div>
           <div className="font-semibold text-lg text-gray-800">{item.produto}</div>
+          <div className="text-gray-400 text-xs mb-1">ID: {item.id}</div>
           <div className="text-gray-500 text-sm mb-1">{item.peso} {item.medida} • {item.quantidade} un.</div>
           <div className="flex flex-wrap gap-2 text-xs text-gray-600 mt-1">
             <span>Preço: R$ {item.preco.toFixed(2)}</span>

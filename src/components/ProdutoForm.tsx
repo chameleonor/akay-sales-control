@@ -10,6 +10,7 @@ interface ProdutoFormProps {
   showImagem?: boolean;
 }
 
+
 export function ProdutoForm({ item, onSave, onCancel, setItems, titulo, showImagem = false }: ProdutoFormProps) {
   const [form, setForm] = React.useState<ProdutoPrimario>(
     item ?? {
@@ -24,6 +25,16 @@ export function ProdutoForm({ item, onSave, onCancel, setItems, titulo, showImag
       imagem: '',
     }
   );
+
+  React.useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape' && onCancel) {
+        onCancel();
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onCancel]);
 
   function handleChange(field: keyof ProdutoPrimario, value: string | number) {
     setForm(f => ({ ...f, [field]: value }));
