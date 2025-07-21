@@ -1,31 +1,29 @@
 import React from "react";
 import type { ProdutoPrimario } from '@types/ProdutoPrimario';
+import { v4 as uuidv4 } from 'uuid';
 
 interface ProdutoFormProps {
   item?: ProdutoPrimario;
   onSave?: (item: ProdutoPrimario) => void;
   onCancel?: () => void;
-  setItems: React.Dispatch<React.SetStateAction<ProdutoPrimario[]>>;
   titulo: string;
   showImagem?: boolean;
 }
 
 
-export function ProdutoForm({ item, onSave, onCancel, setItems, titulo, showImagem = false }: ProdutoFormProps) {
-  const [form, setForm] = React.useState<ProdutoPrimario>(
-    item ?? {
-      id: Date.now(),
-      produto: '',
-      peso: 0,
-      medida: 'g',
-      preco: 0,
-      quantidade: 1,
-      quantidadeAtual: 1,
-      periodo: '',
-      vencimento: '',
-      imagem: '',
-    }
-  );
+export function ProdutoForm({ item, onSave, onCancel, titulo, showImagem = false }: ProdutoFormProps) {
+  const [form, setForm] = React.useState<ProdutoPrimario>({
+    id: uuidv4(),
+    produto: '',
+    peso: 0,
+    medida: 'g',
+    preco: 0,
+    quantidade: 1,
+    quantidadeAtual: 1,
+    periodo: '',
+    vencimento: '',
+    imagem: '',
+  });
 
   React.useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -46,14 +44,6 @@ export function ProdutoForm({ item, onSave, onCancel, setItems, titulo, showImag
     if (!form.produto) return;
     if (onSave) {
       onSave(form);
-    } else {
-      setItems((prev: ProdutoPrimario[]) => {
-        const exists = prev.find(i => i.id === form.id);
-        if (exists) {
-          return prev.map(i => (i.id === form.id ? form : i));
-        }
-        return [...prev, form];
-      });
     }
     if (onCancel) onCancel();
   }

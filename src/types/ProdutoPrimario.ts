@@ -1,5 +1,5 @@
 export type ProdutoPrimario = {
-  id: number;
+  id: string;
   produto: string;
   peso: number;
   medida: 'g' | 'L' | 'ml' | 'Kg';

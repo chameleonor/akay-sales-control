@@ -1,43 +1,44 @@
 import { createLazyFileRoute } from '@tanstack/react-router';
 import React from 'react';
-import { useAtom } from 'jotai';
-import { primarioAtom } from '@stores/primarioAtom';
-import { propriedadesAtom } from '@stores/propriedadesAtom';
-import { corantesAtom } from '@stores/corantesAtom';
-import { essenciasAtom } from '@stores/essenciasAtom';
-import { acabamentosAtom } from '@stores/acabamentosAtom';
-import { embalagensAtom } from '@stores/embalagensAtom';
 import { ProdutoForm } from '@components/ProdutoForm';
 import { ProdutoCard } from '@components/ProdutoCard';
 import type { ProdutoPrimario } from '@types/ProdutoPrimario';
+import { API_URL } from '@constants';
 
 export const Route = createLazyFileRoute('/estoque')({
   component: RouteComponent,
 });
 
 const TABS = [
-  { key: 'primario', label: 'Primário', atom: primarioAtom },
-  { key: 'propriedades', label: 'Propriedades', atom: propriedadesAtom },
-  { key: 'corantes', label: 'Corantes', atom: corantesAtom },
-  { key: 'essencias', label: 'Essências', atom: essenciasAtom },
-  { key: 'acabamentos', label: 'Acabamentos', atom: acabamentosAtom },
-  { key: 'embalagens', label: 'Embalagens', atom: embalagensAtom },
+  { key: 'primario', label: 'Primário', tipo: 'primario' },
+  { key: 'propriedades', label: 'Propriedades', tipo: 'propriedades' },
+  { key: 'corantes', label: 'Corantes', tipo: 'corantes' },
+  { key: 'essencias', label: 'Essências', tipo: 'essencias' },
+  { key: 'acabamentos', label: 'Acabamentos', tipo: 'acabamentos' },
+  { key: 'embalagens', label: 'Embalagens', tipo: 'embalagens' },
 ];
+
 
 function RouteComponent() {
   const [activeTab, setActiveTab] = React.useState('primario');
   const tabConfig = TABS.find(t => t.key === activeTab)!;
-  const [items] = useAtom(tabConfig.atom as any);
+  const [estoque, setEstoque] = React.useState<ProdutoPrimario[]>([]);
   const [menuOpen, setMenuOpen] = React.useState<number | null>(null);
-  const [editId, setEditId] = React.useState<number | null>(null);
+  const [editId, setEditId] = React.useState<string | null>(null);
   const [showNew, setShowNew] = React.useState(false);
   // Filtros
   const [search, setSearch] = React.useState('');
   const [medida, setMedida] = React.useState('');
   const [periodo, setPeriodo] = React.useState('');
 
+  React.useEffect(() => {
+    fetch(`${API_URL}/estoque`)
+      .then(res => res.json())
+      .then(data => setEstoque(data));
+  }, []);
+
   // Função de filtro
-  const itemsArr = items as ProdutoPrimario[];
+  const itemsArr = estoque.filter(item => item.tipo === tabConfig.tipo);
   const filteredItems = itemsArr.filter((item) => {
     const nome = item.produto || '';
     const matchNome = nome.toLowerCase().includes(search.toLowerCase());
@@ -46,13 +47,6 @@ function RouteComponent() {
     return matchNome && matchMedida && matchPeriodo;
   });
 
-  // Atoms setters para cada tipo
-  const [, setItemsPrimario] = useAtom(primarioAtom);
-  const [, setItemsPropriedades] = useAtom(propriedadesAtom);
-  const [, setItemsCorantes] = useAtom(corantesAtom);
-  const [, setItemsEssencias] = useAtom(essenciasAtom);
-  const [, setItemsAcabamentos] = useAtom(acabamentosAtom);
-  const [, setItemsEmbalagens] = useAtom(embalagensAtom);
 
   return (
     <div className="w-full px-4 mt-8">
@@ -186,21 +180,10 @@ function RouteComponent() {
             item={item}
             menuOpen={menuOpen}
             setMenuOpen={setMenuOpen}
-            onEdit={setEditId}
+            onEdit={id => setEditId(id)}
             onDelete={id => {
-              if (activeTab === 'primario') {
-                setItemsPrimario((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
-              } else if (activeTab === 'propriedades') {
-                setItemsPropriedades((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
-              } else if (activeTab === 'corantes') {
-                setItemsCorantes((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
-              } else if (activeTab === 'essencias') {
-                setItemsEssencias((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
-              } else if (activeTab === 'acabamentos') {
-                setItemsAcabamentos((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
-              } else if (activeTab === 'embalagens') {
-                setItemsEmbalagens((es: ProdutoPrimario[]) => es.filter(e => e.id !== id));
-              }
+              fetch(`${API_URL}/estoque/${id}`, { method: 'DELETE' })
+                .then(() => setEstoque(prev => prev.filter(i => i.id !== id)));
               setMenuOpen(null);
             }}
           />
@@ -216,49 +199,36 @@ function RouteComponent() {
             >
               ×
             </button>
-            {activeTab === 'primario' && (
-              <ProdutoForm
-                titulo="Primário"
-                setItems={setItemsPrimario}
-                onCancel={() => setShowNew(false)}
-              />
-            )}
-            {activeTab === 'propriedades' && (
-              <ProdutoForm
-                titulo="Propriedade"
-                setItems={setItemsPropriedades}
-                onCancel={() => setShowNew(false)}
-              />
-            )}
-            {activeTab === 'corantes' && (
-              <ProdutoForm
-                titulo="Corante"
-                setItems={setItemsCorantes}
-                showImagem
-                onCancel={() => setShowNew(false)}
-              />
-            )}
-            {activeTab === 'essencias' && (
-              <ProdutoForm
-                titulo="Essência"
-                setItems={setItemsEssencias}
-                onCancel={() => setShowNew(false)}
-              />
-            )}
-            {activeTab === 'acabamentos' && (
-              <ProdutoForm
-                titulo="Acabamento"
-                setItems={setItemsAcabamentos}
-                onCancel={() => setShowNew(false)}
-              />
-            )}
-            {activeTab === 'embalagens' && (
-              <ProdutoForm
-                titulo="Embalagem"
-                setItems={setItemsEmbalagens}
-                onCancel={() => setShowNew(false)}
-              />
-            )}
+            <ProdutoForm
+              titulo={tabConfig.label}
+              onSave={item => {
+                if (!item.id) {
+                  fetch(`${API_URL}/estoque`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...item, tipo: tabConfig.tipo })
+                  })
+                    .then(res => res.json())
+                    .then(newItem => setEstoque(prev => [...prev, newItem]));
+                } else {
+                  fetch(`${API_URL}/estoque/${item.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item)
+                  })
+                    .then(res => res.json())
+                    .then(updated => setEstoque(prev => prev.map(i => i.id === item.id ? updated : i)));
+                }
+                setShowNew(false);
+                setEditId(null);
+              }}
+              onCancel={() => {
+                setShowNew(false);
+                setEditId(null);
+              }}
+              item={editId ? estoque.find(i => i.id === editId) : undefined}
+              showImagem={activeTab === 'corantes'}
+            />
           </div>
         </div>
       )}
@@ -272,85 +242,36 @@ function RouteComponent() {
             >
               ×
             </button>
-            {activeTab === 'primario' && (
-              <ProdutoForm
-                titulo="Primário"
-                setItems={setItemsPrimario}
-                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
-                onSave={item => {
-                  setItemsPrimario((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
-                  setEditId(null);
-                  setActiveTab('primario');
-                }}
-                onCancel={() => setEditId(null)}
-              />
-            )}
-            {activeTab === 'propriedades' && (
-              <ProdutoForm
-                titulo="Propriedade"
-                setItems={setItemsPropriedades}
-                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
-                onSave={item => {
-                  setItemsPropriedades((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
-                  setEditId(null);
-                  setActiveTab('propriedades');
-                }}
-                onCancel={() => setEditId(null)}
-              />
-            )}
-            {activeTab === 'corantes' && (
-              <ProdutoForm
-                titulo="Corante"
-                setItems={setItemsCorantes}
-                showImagem
-                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
-                onSave={item => {
-                  setItemsCorantes((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
-                  setEditId(null);
-                  setActiveTab('corantes');
-                }}
-                onCancel={() => setEditId(null)}
-              />
-            )}
-            {activeTab === 'essencias' && (
-              <ProdutoForm
-                titulo="Essência"
-                setItems={setItemsEssencias}
-                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
-                onSave={item => {
-                  setItemsEssencias((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
-                  setEditId(null);
-                  setActiveTab('essencias');
-                }}
-                onCancel={() => setEditId(null)}
-              />
-            )}
-            {activeTab === 'acabamentos' && (
-              <ProdutoForm
-                titulo="Acabamento"
-                setItems={setItemsAcabamentos}
-                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
-                onSave={item => {
-                  setItemsAcabamentos((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
-                  setEditId(null);
-                  setActiveTab('acabamentos');
-                }}
-                onCancel={() => setEditId(null)}
-              />
-            )}
-            {activeTab === 'embalagens' && (
-              <ProdutoForm
-                titulo="Embalagem"
-                setItems={setItemsEmbalagens}
-                item={(items as ProdutoPrimario[]).find((i: ProdutoPrimario) => i.id === editId)}
-                onSave={item => {
-                  setItemsEmbalagens((prev: ProdutoPrimario[]) => prev.map(i => i.id === item.id ? item : i));
-                  setEditId(null);
-                  setActiveTab('embalagens');
-                }}
-                onCancel={() => setEditId(null)}
-              />
-            )}
+            <ProdutoForm
+              titulo={tabConfig.label}
+              item={editId ? estoque.find(i => i.id === editId) : undefined}
+              showImagem={activeTab === 'corantes'}
+              onSave={item => {
+                if (!item.id) {
+                  fetch('${API_URL}/estoque', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ ...item, tipo: tabConfig.tipo })
+                  })
+                    .then(res => res.json())
+                    .then(newItem => setEstoque(prev => [...prev, newItem]));
+                } else {
+                  fetch(`${API_URL}/estoque/${item.id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item)
+                  })
+                    .then(res => res.json())
+                    .then(updated => setEstoque(prev => prev.map(i => i.id === item.id ? updated : i)));
+                }
+                setShowNew(false);
+                setEditId(null);
+              }}
+              onCancel={() => {
+                setShowNew(false);
+                setEditId(null);
+              }}
+            />
           </div>
         </div>
       )}

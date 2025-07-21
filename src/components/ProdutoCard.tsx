@@ -1,3 +1,4 @@
+import {useState } from 'react';
 import type { ProdutoPrimario } from '@types/ProdutoPrimario';
 
 interface ProdutoCardProps {
@@ -9,15 +10,27 @@ interface ProdutoCardProps {
 }
 
 export function ProdutoCard({ item, onEdit, onDelete, menuOpen, setMenuOpen }: ProdutoCardProps) {
+  const [imgLoaded, setImgLoaded] = useState(false);
+  const [imgError, setImgError] = useState(false);
+  const imgSrc = item.imagem && item.imagem.trim() !== '' ? item.imagem : `https://source.unsplash.com/120x120/?${encodeURIComponent(item.produto)}`;
+
   return (
     <div className="bg-white rounded shadow flex flex-row p-4 relative group hover:shadow-lg transition min-h-[100px]">
       <div className="w-24 h-24 flex-shrink-0 rounded bg-gray-100 flex items-center justify-center overflow-hidden border mr-4">
-        <img
-          src={item.imagem && item.imagem.trim() !== '' ? item.imagem : `https://source.unsplash.com/120x120/?${encodeURIComponent(item.produto)}`}
-          alt={item.produto}
-          className="object-cover w-full h-full"
-          onError={e => (e.currentTarget.src = '')}
-        />
+        {!imgLoaded && !imgError && (
+          <div className="w-full h-full flex items-center justify-center animate-pulse bg-gray-200">
+            <div className="w-12 h-12 rounded bg-gray-300" />
+          </div>
+        )}
+        {!imgError && (
+          <img
+            src={imgSrc}
+            alt={item.produto}
+            className={`object-cover w-full h-full ${imgLoaded ? '' : 'hidden'}`}
+            onLoad={() => setImgLoaded(true)}
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
       <div className="flex-1 flex flex-col justify-between">
         <div>

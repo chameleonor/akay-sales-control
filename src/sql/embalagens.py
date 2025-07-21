@@ -1,0 +1,53 @@
+# Script para popular a tabela estoque com os dados do atom embalagensAtom
+import requests
+import uuid
+
+embalagens = [
+    {"id": 1, "produto": "Vidro Cubo de Gelo G28", "peso": 250, "medida": "ml", "preco": 10.3, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "//peterpaiva.jetassets.com.br/produto/00010998_2023-05-18_17_58_14_0.png", "tipo": "embalagens"},
+    {"id": 2, "produto": "Vidro Cubo de Gelo G28", "peso": 250, "medida": "ml", "preco": 13.6, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "//peterpaiva.jetassets.com.br/produto/00010998_2023-05-18_17_58_14_0.png", "tipo": "embalagens"},
+    {"id": 3, "produto": "Vidro Safira G28", "peso": 250, "medida": "ml", "preco": 8.4, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 4, "produto": "Vidro Safira G28", "peso": 250, "medida": "ml", "preco": 8.4, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 5, "produto": "Vidro Cilindrico c/ tampa G28", "peso": 240, "medida": "ml", "preco": 17.9, "quantidade": 3, "quantidadeAtual": 3, "periodo": "26/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 6, "produto": "Vidro Estileto G18", "peso": 100, "medida": "ml", "preco": 7.4, "quantidade": 2, "quantidadeAtual": 2, "periodo": "26/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 7, "produto": "Vidro Garrafinha c/ tampa G24", "peso": 70, "medida": "ml", "preco": 5.8, "quantidade": 1, "quantidadeAtual": 1, "periodo": "12/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 8, "produto": "Vidro Garrafinha c/ tampa G24", "peso": 70, "medida": "ml", "preco": 5.8, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 9, "produto": "Vidro Cristal c/ bulbo branco", "peso": 30, "medida": "ml", "preco": 5.3, "quantidade": 1, "quantidadeAtual": 1, "periodo": "12/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 10, "produto": "Vidro Cristal c/ bulbo branco", "peso": 30, "medida": "ml", "preco": 5.3, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 11, "produto": "Vidro Garrafa c/ tampa G24", "peso": 110, "medida": "ml", "preco": 7.5, "quantidade": 1, "quantidadeAtual": 1, "periodo": "12/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 12, "produto": "Vidro Garrafa c/ tampa G24", "peso": 110, "medida": "ml", "preco": 7.5, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 13, "produto": "Vidro Roll On", "peso": 10, "medida": "ml", "preco": 6, "quantidade": 2, "quantidadeAtual": 2, "periodo": "03/06/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 14, "produto": "Vidro Aromatizador Cubo Carro c/cordão preto", "peso": 9, "medida": "ml", "preco": 4, "quantidade": 1, "quantidadeAtual": 1, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 15, "produto": "Frasco Sais de Banho c/ Rolha", "peso": 300, "medida": "ml", "preco": 6.7, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 16, "produto": "Pote Bio Pomada c/ tampa Prata", "peso": 200, "medida": "g", "preco": 6.72, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 17, "produto": "Pote Bio Cristal Quadrado", "peso": 200, "medida": "g", "preco": 4.7, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 18, "produto": "Pote Bio Cristal Redondo", "peso": 200, "medida": "g", "preco": 4.7, "quantidade": 2, "quantidadeAtual": 2, "periodo": "26/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 19, "produto": "Frasco Pet Cilindrico Reto G24", "peso": 200, "medida": "ml", "preco": 2, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 20, "produto": "Frasco Pet Cilindrico G28", "peso": 200, "medida": "ml", "preco": 1.89, "quantidade": 2, "quantidadeAtual": 2, "periodo": "12/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 21, "produto": "Frasco Pet Cilindrico G28", "peso": 200, "medida": "ml", "preco": 1.89, "quantidade": 2, "quantidadeAtual": 2, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 22, "produto": "Frasco Bio Cilindrico G24", "peso": 140, "medida": "ml", "preco": 2.9, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 23, "produto": "Frasco Bio Cilindrico G24", "peso": 140, "medida": "ml", "preco": 2.9, "quantidade": 2, "quantidadeAtual": 2, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 24, "produto": "Frasco Bio Cilindrico G24", "peso": 120, "medida": "ml", "preco": 1.96, "quantidade": 2, "quantidadeAtual": 2, "periodo": "12/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 25, "produto": "Frasco Bio Cilindrico G24", "peso": 120, "medida": "ml", "preco": 1.96, "quantidade": 2, "quantidadeAtual": 2, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 26, "produto": "Frasco Bio Quadrado G24", "peso": 120, "medida": "ml", "preco": 3.2, "quantidade": 2, "quantidadeAtual": 2, "periodo": "05/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 27, "produto": "Frasco Pet Cilindrico G28", "peso": 1000, "medida": "ml", "preco": 7.3, "quantidade": 2, "quantidadeAtual": 2, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 28, "produto": "Frasco Pet Ambar G24", "peso": 250, "medida": "ml", "preco": 1.4, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 29, "produto": "Frasco Pet Ambar G24", "peso": 120, "medida": "ml", "preco": 1, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 30, "produto": "Frasco Pet Ambar G24", "peso": 120, "medida": "ml", "preco": 1, "quantidade": 4, "quantidadeAtual": 4, "periodo": "03/06/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 31, "produto": "Frasco Espumador", "peso": 60, "medida": "ml", "preco": 8, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/06/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 32, "produto": "Frasco Espumador Tubo Cristal", "peso": 180, "medida": "ml", "preco": 10.7, "quantidade": 1, "quantidadeAtual": 1, "periodo": "17/05/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 33, "produto": "Frasco Pump Espumador Rosto (3unid)", "peso": 150, "medida": "ml", "preco": 19.99, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 34, "produto": "Dispenser Glass Foam Soap", "peso": 355, "medida": "ml", "preco": 101.5, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 35, "produto": "Dispenser Pet Foam Soap", "peso": 450, "medida": "ml", "preco": 18.13, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 36, "produto": "Dispenser Pet Foam Soap", "peso": 450, "medida": "ml", "preco": 18.13, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 37, "produto": "Dispenser Pet Foam Soap", "peso": 450, "medida": "ml", "preco": 18.13, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 38, "produto": "Dispenser Pet Foam Soap", "peso": 450, "medida": "ml", "preco": 18.13, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 39, "produto": "Pote Pet Tampa Alumínio", "peso": 280, "medida": "ml", "preco": 10, "quantidade": 1, "quantidadeAtual": 1, "periodo": "03/04/2025", "vencimento": "", "imagem": "", "tipo": "embalagens"},
+    {"id": 40, "produto": "Cúpula Acetato c/ Tampa Preta (10unid)", "peso": 0, "medida": "", "preco": 2.58, "quantidade": 10, "quantidadeAtual": 10, "periodo": "", "vencimento": "17/05/2025", "imagem": "", "tipo": "embalagens"},
+    {"id": 41, "produto": "Cúpula Acetato c/ Tampa Transparente (10unid)", "peso": 0, "medida": "", "preco": 23.5, "quantidade": 1, "quantidadeAtual": 1, "periodo": "", "vencimento": "03/06/2025", "imagem": "", "tipo": "embalagens"},
+    {"id": 42, "produto": "Caixa Acetato 6x6x3,5cm (20unid)", "peso": 0, "medida": "", "preco": 24.4, "quantidade": 1, "quantidadeAtual": 1, "periodo": "", "vencimento": "07/06/2025", "imagem": "", "tipo": "embalagens"},
+]
+
+for item in embalagens:
+    item["id"] = str(uuid.uuid4())
+    response = requests.post('http://localhost:4000/api/estoque', json=item)
+    print('Enviado:', item["produto"], '| Status:', response.status_code)

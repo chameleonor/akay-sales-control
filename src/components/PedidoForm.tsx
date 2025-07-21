@@ -1,6 +1,4 @@
 import React from 'react';
-import { API_URL } from '../constants';
-
 function getProdutos(tipo: string, atoms: any) {
   switch (tipo) {
     case 'primario': return atoms.primario;
@@ -12,9 +10,6 @@ function getProdutos(tipo: string, atoms: any) {
     default: return [];
   }
 }
-
-
-
 export function PedidoForm({ receitas, atoms, onSave, onCancel, pedido }: {
   receitas: any[];
   atoms: any;
