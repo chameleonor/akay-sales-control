@@ -1,17 +1,19 @@
 import React from "react";
 import type { ProdutoPrimario } from '@types/ProdutoPrimario';
 import { v4 as uuidv4 } from 'uuid';
+import { API_URL } from "@constants";
 
 interface ProdutoFormProps {
   item?: ProdutoPrimario;
   onSave?: (item: ProdutoPrimario) => void;
   onCancel?: () => void;
   titulo: string;
+  tipo: string;
   showImagem?: boolean;
 }
 
 
-export function ProdutoForm({ item, onSave, onCancel, titulo, showImagem = false }: ProdutoFormProps) {
+export function ProdutoForm({ item, onSave, onCancel, titulo, tipo, showImagem = false }: ProdutoFormProps) {
   const [form, setForm] = React.useState<ProdutoPrimario>({
     id: uuidv4(),
     produto: '',
@@ -23,6 +25,7 @@ export function ProdutoForm({ item, onSave, onCancel, titulo, showImagem = false
     periodo: '',
     vencimento: '',
     imagem: '',
+    tipo: tipo,
   });
 
   React.useEffect(() => {
@@ -43,7 +46,25 @@ export function ProdutoForm({ item, onSave, onCancel, titulo, showImagem = false
     e.preventDefault();
     if (!form.produto) return;
     if (onSave) {
-      onSave(form);
+      if (item && item.id) {
+        // Editar: PUT
+        fetch(`${API_URL}/estoque/${item.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form)
+        })
+          .then(res => res.json())
+          .then(data => onSave(data));
+      } else {
+        // Novo: POST
+        fetch(`${API_URL}/estoque`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...form, tipo })
+        })
+          .then(res => res.json())
+          .then(data => onSave(data));
+      }
     }
     if (onCancel) onCancel();
   }
@@ -51,6 +72,7 @@ export function ProdutoForm({ item, onSave, onCancel, titulo, showImagem = false
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded shadow p-4 w-full max-w-lg mx-auto">
       <h2 className="text-lg font-bold mb-4">{item ? 'Editar' : 'Adicionar'} {titulo}</h2>
+      <div className="text-xs text-gray-500 mb-2">Tipo: <span className="font-semibold">{tipo}</span></div>
       <div className="flex flex-wrap gap-4">
         <label className="flex flex-col flex-1 min-w-[120px]">
           <span className="text-xs text-gray-600 mb-1">Produto</span>

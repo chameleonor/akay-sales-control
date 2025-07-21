@@ -201,6 +201,7 @@ function RouteComponent() {
             </button>
             <ProdutoForm
               titulo={tabConfig.label}
+              tipo={tabConfig.tipo}
               onSave={item => {
                 if (!item.id) {
                   fetch(`${API_URL}/estoque`, {
@@ -244,11 +245,12 @@ function RouteComponent() {
             </button>
             <ProdutoForm
               titulo={tabConfig.label}
+              tipo={tabConfig.tipo}
               item={editId ? estoque.find(i => i.id === editId) : undefined}
               showImagem={activeTab === 'corantes'}
               onSave={item => {
                 if (!item.id) {
-                  fetch('${API_URL}/estoque', {
+                  fetch(`${API_URL}/estoque`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ ...item, tipo: tabConfig.tipo })
