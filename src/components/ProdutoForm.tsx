@@ -15,28 +15,36 @@ interface ProdutoFormProps {
 
 export function ProdutoForm({ item, onSave, onCancel, titulo, tipo, showImagem = false }: ProdutoFormProps) {
   const [form, setForm] = React.useState<ProdutoPrimario>({
-    id: uuidv4(),
+    id: '',
     produto: '',
-    peso: 0,
-    medida: 'g',
-    preco: 0,
-    quantidade: 1,
-    quantidadeAtual: 1,
+    medida: '',
+    quantidadeAtual: 0,
     periodo: '',
-    vencimento: '',
-    imagem: '',
     tipo: tipo,
+    imagem: '',
   });
 
   React.useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === 'Escape' && onCancel) {
-        onCancel();
-      }
+    if (item) {
+      setForm(item);
     }
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onCancel]);
+  }, [item]);
+
+  React.useEffect(() => {
+    if (item) {
+      setForm({ ...item });
+    } else {
+      setForm({
+        id: '',
+        produto: '',
+        medida: '',
+        quantidadeAtual: 0,
+        periodo: '',
+        tipo: tipo,
+        imagem: '',
+      });
+    }
+  }, [item, tipo]);
 
   function handleChange(field: keyof ProdutoPrimario, value: string | number) {
     setForm(f => ({ ...f, [field]: value }));
@@ -68,6 +76,16 @@ export function ProdutoForm({ item, onSave, onCancel, titulo, tipo, showImagem =
     }
     if (onCancel) onCancel();
   }
+
+  React.useEffect(() => {
+    function handleEsc(event: KeyboardEvent) {
+      if (event.key === 'Escape' && onCancel) {
+        onCancel();
+      }
+    }
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [onCancel]);
 
   return (
     <form onSubmit={handleSubmit} className="bg-white rounded shadow p-4 w-full max-w-lg mx-auto">

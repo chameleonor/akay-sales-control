@@ -11,8 +11,16 @@
     "prefix": ""
   },
   "aliases": {
-    "components": "@/components",
-    "utils": "@/utils",
-    "stores": "@/stores"
+    "components": "@components",
+    "utils": "@utils",
+    "stores": "@stores",
+    "types": "@types",
+    "hooks": "@hooks",
+    "assets": "@assets",
+    "server": "@server",
+    "routes": "@routes",
+    "sql": "@sql",
+    "styles": "@styles",
+    "lib": "@lib"
   }
 }

@@ -118,8 +118,8 @@ export function ReceitaForm({
           aria-label="Fechar"
         >
           <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" stroke="currentColor"/>
-            <line x1="6" y1="18" x2="18" y2="6" strokeWidth="2" stroke="currentColor"/>
+            <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" stroke="currentColor" />
+            <line x1="6" y1="18" x2="18" y2="6" strokeWidth="2" stroke="currentColor" />
           </svg>
         </button>
         <div className="flex-1 overflow-y-auto px-6 pt-6 pb-2">
@@ -153,8 +153,8 @@ export function ReceitaForm({
               onClick={handleAddItem}
             >
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2" stroke="currentColor"/>
-                <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2" stroke="currentColor"/>
+                <line x1="12" y1="5" x2="12" y2="19" strokeWidth="2" stroke="currentColor" />
+                <line x1="5" y1="12" x2="19" y2="12" strokeWidth="2" stroke="currentColor" />
               </svg>
             </button>
           </div>
@@ -225,13 +225,25 @@ export function ReceitaForm({
                         type="text"
                         tabIndex={-1}
                         readOnly
-                        value={(function() {
-                          const prod = produtos.find(p => p.id === item.produtoId);
+                        value={(function () {
+                          const prod = produtos.find(p => Number(p.id) === Number(item.produtoId));
                           if (!prod || typeof prod.preco !== 'number' || typeof item.quantidade !== 'number') return '-';
                           const val = prod.preco * item.quantidade;
                           return `R$ ${val.toFixed(2)}`;
                         })()}
                       />
+                      {/* Campo de correspondência da fração */}
+                      <div className="text-xs text-gray-500 mt-1 text-center">
+                        {(function () {
+                          const prod = produtos.find(p => p.id === item.produtoId);
+                          if (!prod || typeof prod.peso !== 'number' || typeof item.quantidade !== 'number') return null;
+                          const total = prod.peso;
+                          const unidade = prod.medida || '';
+                          const fracionado = (item.quantidade * total);
+                          if (!isFinite(fracionado)) return null;
+                          return `${item.quantidade} equivale a ${fracionado.toLocaleString(undefined, { maximumFractionDigits: 4 })}${unidade ? ' ' + unidade : ''} de ${total}${unidade}`;
+                        })()}
+                      </div>
                     </div>
                     <button
                       type="button"
@@ -240,8 +252,8 @@ export function ReceitaForm({
                       onClick={() => handleRemoveItem(idx)}
                     >
                       <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" stroke="currentColor"/>
-                        <line x1="6" y1="18" x2="18" y2="6" strokeWidth="2" stroke="currentColor"/>
+                        <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" stroke="currentColor" />
+                        <line x1="6" y1="18" x2="18" y2="6" strokeWidth="2" stroke="currentColor" />
                       </svg>
                     </button>
                   </div>
