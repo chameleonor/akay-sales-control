@@ -23,6 +23,18 @@ router.get('/pedidos', (req, res) => {
   });
 });
 
+// Buscar pedido por id
+router.get('/pedidos/:id', (req, res) => {
+  db.get('SELECT * FROM pedidos WHERE id = ?', [req.params.id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'Pedido não encontrado' });
+    res.json({
+      ...row,
+      receitas: JSON.parse(row.receitas)
+    });
+  });
+});
+
 // Criar novo pedido
 router.post('/pedidos', (req, res) => {
   const { id, data, receitas } = req.body;

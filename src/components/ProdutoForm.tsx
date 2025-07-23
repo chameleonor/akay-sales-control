@@ -91,7 +91,7 @@ export function ProdutoForm({ item, onSave, onCancel, titulo, tipo, showImagem =
     <form onSubmit={handleSubmit} className="bg-white rounded shadow p-4 w-full max-w-lg mx-auto">
       <h2 className="text-lg font-bold mb-4">{item ? 'Editar' : 'Adicionar'} {titulo}</h2>
       <div className="text-xs text-gray-500 mb-2">Tipo: <span className="font-semibold">{tipo}</span></div>
-      <div className="flex flex-wrap gap-4">
+      <div className="flex flex-wrap gap-4 justify-between mb-4">
         <label className="flex flex-col flex-1 min-w-[120px]">
           <span className="text-xs text-gray-600 mb-1">Produto</span>
           <input
@@ -176,18 +176,16 @@ export function ProdutoForm({ item, onSave, onCancel, titulo, tipo, showImagem =
             placeholder="MM/AAAA"
           />
         </label>
-        {showImagem && (
-          <label className="flex flex-col w-32 min-w-[110px]">
-            <span className="text-xs text-gray-600 mb-1">Imagem</span>
-            <input
-              type="text"
-              className="border rounded px-2 py-1"
-              value={form.imagem}
-              onChange={e => handleChange('imagem', e.target.value)}
-              placeholder="URL da imagem"
-            />
-          </label>
-        )}
+        <label className="flex flex-col w-96 min-w-[110px]">
+          <span className="text-xs text-gray-600 mb-1">Imagem</span>
+          <input
+            type="text"
+            className="border rounded px-2 py-1 w-full"
+            value={form.imagem}
+            onChange={e => handleChange('imagem', e.target.value)}
+            placeholder="URL da imagem"
+          />
+        </label>
       </div>
       <div className="flex gap-2 mt-6">
         <button type="submit" className="bg-blue-600 text-white px-3 py-1 rounded">Salvar</button>
