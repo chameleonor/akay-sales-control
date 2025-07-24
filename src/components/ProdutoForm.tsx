@@ -151,9 +151,8 @@ export function ProdutoForm({ item, onSave, onCancel, titulo, tipo, showImagem =
           <input
             type="number"
             className="border rounded px-2 py-1"
-            value={form.quantidadeAtual === 0 ? '' : form.quantidadeAtual}
-            onChange={e => handleChange('quantidadeAtual', e.target.value === '' ? 0 : Number(e.target.value))}
-            min={0}
+            value={form.quantidadeAtual}
+            onChange={e => handleChange('quantidadeAtual', Number(e.target.value))}
           />
         </label>
         <label className="flex flex-col w-32 min-w-[110px]">

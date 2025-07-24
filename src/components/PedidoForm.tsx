@@ -1,3 +1,4 @@
+import { API_URL } from '@constants';
 import React from 'react';
 function getProdutos(tipo: string, atoms: any) {
   switch (tipo) {
@@ -41,7 +42,26 @@ export function PedidoForm({ receitas, atoms, onSave, onCancel, pedido }: {
       receitas: selected.map(id => ({ receitaId: id })),
       data
     };
-    // Não faz fetch aqui, pois já é feito no onSave do parent
+
+    // Atualizar estoque dos produtos usados nas receitas selecionadas
+    for (const receitaId of selected) {
+      const receita = receitas.find(r => r.id === receitaId);
+      if (!receita || !receita.itens) continue;
+      for (const item of receita.itens) {
+        const produtos = getProdutos(item.tipo, atoms);
+        const prod = produtos.find((p: any) => p.id === item.produtoId);
+        if (!prod) continue;
+        // Reduzir quantidadeAtual do produto via API
+        const novoValor = Math.max(0, (prod.quantidadeAtual ?? 0) - (item.quantidade ?? 0));
+        console.log(`Atualizando produto ${prod.id} de ${prod.quantidadeAtual} para ${novoValor}`);
+        await fetch(`${API_URL}/estoque/${prod.id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...prod, quantidadeAtual: novoValor })
+        });
+      }
+    }
+
     onSave(pedidoData);
   }
 

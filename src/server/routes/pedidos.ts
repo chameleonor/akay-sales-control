@@ -1,8 +1,16 @@
 import { Router } from 'express';
 import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const db_path = path.join(__dirname, '..', 'akay-sales.db');
+
+console.log("db_path.toString():", db_path.toString());
 
 const router = Router();
-const db = new sqlite3.Database('akay-sales.db');
+const db = new sqlite3.Database(db_path.toString());
 
 db.run(`
   CREATE TABLE IF NOT EXISTS pedidos (

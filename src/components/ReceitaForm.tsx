@@ -187,7 +187,9 @@ export function ReceitaForm({
                     >
                       <option value="">Selecione...</option>
                       {produtos.map(produto => (
-                        <option key={produto.id} value={produto.id}>{produto.produto}</option>
+                        <option key={produto.id} value={produto.id}>
+                          {produto.produto} (ID: {produto.id})
+                        </option>
                       ))}
                     </select>
                     {/* Informativo do produto selecionado */}

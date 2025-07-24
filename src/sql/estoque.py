@@ -1,6 +1,46 @@
-
-# Utilitários para manipulação da tabela estoque via API
+import sqlite3
 import requests
+from pathlib import Path
+
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+db_path = PROJECT_ROOT / 'server' / 'akay-sales.db'
+
+def migrate_quantidade_to_real(db_path=db_path):
+    """
+    Altera as colunas quantidade e quantidadeAtual da tabela estoque para REAL (float).
+    Cria uma tabela temporária, copia os dados, remove a antiga e renomeia a nova.
+    """
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    try:
+        cur.execute('''
+            CREATE TABLE IF NOT EXISTS estoque_temp (
+                id TEXT PRIMARY KEY,
+                produto TEXT,
+                peso REAL,
+                medida TEXT,
+                preco REAL,
+                quantidade REAL,
+                quantidadeAtual REAL,
+                periodo TEXT,
+                vencimento TEXT,
+                imagem TEXT,
+                tipo TEXT
+            )
+        ''')
+        cur.execute('''
+            INSERT INTO estoque_temp (id, produto, peso, medida, preco, quantidade, quantidadeAtual, periodo, vencimento, imagem, tipo)
+            SELECT id, produto, peso, medida, preco, quantidade, quantidadeAtual, periodo, vencimento, imagem, tipo FROM estoque
+        ''')
+        cur.execute('DROP TABLE estoque')
+        cur.execute('ALTER TABLE estoque_temp RENAME TO estoque')
+        conn.commit()
+        print('Migração concluída: quantidade e quantidadeAtual agora são REAL.')
+    except Exception as e:
+        print('Erro na migração:', e)
+        conn.rollback()
+    finally:
+        conn.close()
 
 API_URL = 'http://localhost:4000/api/estoque'
 
@@ -40,5 +80,5 @@ def get_item(item_id):
 
 if __name__ == "__main__":
     # Exemplo de uso: deletar todos os itens
-    drop_estoque_table()
+    migrate_quantidade_to_real()
 

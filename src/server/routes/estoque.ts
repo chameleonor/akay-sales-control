@@ -1,8 +1,14 @@
 import { Router } from 'express';
 import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const db_path = path.join(__dirname, '..', 'akay-sales.db');
 
 const router = Router();
-const db = new sqlite3.Database('akay-sales.db');
+const db = new sqlite3.Database(db_path.toString());
 
 // Cria a tabela de estoque se não existir
 // Estrutura baseada em ProdutoPrimario
@@ -15,8 +21,8 @@ db.run(`
     peso REAL,
     medida TEXT,
     preco REAL,
-    quantidade INTEGER,
-    quantidadeAtual INTEGER,
+    quantidade REAL,
+    quantidadeAtual REAL,
     periodo TEXT,
     vencimento TEXT,
     imagem TEXT,
@@ -36,6 +42,16 @@ router.get('/estoque', (req, res) => {
     db.all(sql, params, (err, rows) => {
         if (err) return res.status(500).json({ error: err.message });
         res.json(rows);
+    });
+});
+
+// Buscar item de estoque por id
+router.get('/estoque/:id', (req, res) => {
+    const { id } = req.params;
+    db.get('SELECT * FROM estoque WHERE id = ?', [id], (err, row) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (!row) return res.status(404).json({ error: 'Item não encontrado' });
+        res.json(row);
     });
 });
 
