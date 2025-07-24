@@ -7,8 +7,6 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const db_path = path.join(__dirname, '..', 'akay-sales.db');
 
-console.log("db_path.toString():", db_path.toString());
-
 const router = Router();
 const db = new sqlite3.Database(db_path.toString());
 

@@ -1,54 +1,80 @@
 import React from 'react';
 import { createLazyFileRoute } from '@tanstack/react-router';
 import { ReceitaForm, Receita } from '@components/ReceitaForm';
-import { useAtom } from 'jotai';
-import { receitasAtom } from '@stores/receitasAtom';
-import { primarioAtom } from '@stores/primarioAtom';
-import { propriedadesAtom } from '@stores/propriedadesAtom';
-import { corantesAtom } from '@stores/corantesAtom';
-import { essenciasAtom } from '@stores/essenciasAtom';
-import { acabamentosAtom } from '@stores/acabamentosAtom';
-import { embalagensAtom } from '@stores/embalagensAtom';
+import { API_URL } from '@constants';
+
 
 export const Route = createLazyFileRoute('/receitas')({
   component: RouteComponent,
 })
 
 function RouteComponent() {
-  const [receitas, setReceitas] = useAtom(receitasAtom);
-  const [primario] = useAtom(primarioAtom);
-  const [propriedades] = useAtom(propriedadesAtom);
-  const [corantes] = useAtom(corantesAtom);
-  const [essencias] = useAtom(essenciasAtom);
-  const [acabamentos] = useAtom(acabamentosAtom);
-  const [embalagens] = useAtom(embalagensAtom);
+  const [receitas, setReceitas] = React.useState<Receita[]>([]);
+
+  // Carregar receitas da API
+  React.useEffect(() => {
+    fetch(`${API_URL}/receitas`)
+      .then(res => res.json())
+      .then(data => setReceitas(Array.isArray(data) ? data.map(r => ({ ...r, itens: typeof r.itens === 'string' ? JSON.parse(r.itens) : r.itens })) : []));
+  }, []);
+  // Produtos por tipo vindos da API
+  const [produtosPorTipo, setProdutosPorTipo] = React.useState<Record<string, any[]>>({});
+  React.useEffect(() => {
+    async function fetchProdutos() {
+      const tipos = ['primario', 'propriedades', 'corantes', 'essencias', 'acabamentos', 'embalagens'];
+      const result: Record<string, any[]> = {};
+      for (const tipo of tipos) {
+        try {
+          const res = await fetch(`${API_URL}/estoque?tipo=${tipo}`);
+          result[tipo] = res.ok ? await res.json() : [];
+        } catch {
+          result[tipo] = [];
+        }
+      }
+      setProdutosPorTipo(result);
+    }
+    fetchProdutos();
+  }, []);
   const [menuOpen, setMenuOpen] = React.useState<number | null>(null);
   const [editId, setEditId] = React.useState<number | null>(null);
   const [newOpen, setNewOpen] = React.useState(false);
 
-  function handleSaveEdit(updated: Receita) {
-    setReceitas(rs => rs.map(r => (r.id === updated.id ? updated : r)));
+  async function handleSaveEdit(updated: Receita) {
+    await fetch(`${API_URL}/receitas/${updated.id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated)
+    });
+    // Atualiza lista
+    const res = await fetch(`${API_URL}/receitas`);
+    const data = await res.json();
+    setReceitas(Array.isArray(data) ? data.map(r => ({ ...r, itens: typeof r.itens === 'string' ? JSON.parse(r.itens) : r.itens })) : []);
     setEditId(null);
   }
 
-  function handleSaveNew(nova: Receita) {
-    setReceitas(rs => [
-      { ...nova, id: Date.now(), data: new Date().toISOString() },
-      ...rs
-    ]);
+  async function handleSaveNew(nova: Receita) {
+    await fetch(`${API_URL}/receitas`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(nova)
+    });
+    // Atualiza lista
+    const res = await fetch(`${API_URL}/receitas`);
+    const data = await res.json();
+    setReceitas(Array.isArray(data) ? data.map(r => ({ ...r, itens: typeof r.itens === 'string' ? JSON.parse(r.itens) : r.itens })) : []);
     setNewOpen(false);
   }
 
+  async function handleDelete(id: number) {
+    await fetch(`${API_URL}/receitas/${id}`, { method: 'DELETE' });
+    // Atualiza lista
+    const res = await fetch(`${API_URL}/receitas`);
+    const data = await res.json();
+    setReceitas(Array.isArray(data) ? data.map(r => ({ ...r, itens: typeof r.itens === 'string' ? JSON.parse(r.itens) : r.itens })) : []);
+  }
+
   function getProdutos(tipo: string) {
-    switch (tipo) {
-      case 'primario': return primario;
-      case 'propriedades': return propriedades;
-      case 'corantes': return corantes;
-      case 'essencias': return essencias;
-      case 'acabamentos': return acabamentos;
-      case 'embalagens': return embalagens;
-      default: return [];
-    }
+    return produtosPorTipo[tipo] || [];
   }
 
   return (
@@ -90,9 +116,9 @@ function RouteComponent() {
                       onClick={() => setMenuOpen(menuOpen === receita.id ? null : receita.id)}
                     >
                       <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <circle cx="5" cy="12" r="2"/>
-                        <circle cx="12" cy="12" r="2"/>
-                        <circle cx="19" cy="12" r="2"/>
+                        <circle cx="5" cy="12" r="2" />
+                        <circle cx="12" cy="12" r="2" />
+                        <circle cx="19" cy="12" r="2" />
                       </svg>
                     </button>
                     {menuOpen === receita.id && (
@@ -108,8 +134,8 @@ function RouteComponent() {
                         </button>
                         <button
                           className="block w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
-                          onClick={() => {
-                            setReceitas(rs => rs.filter(r => r.id !== receita.id));
+                          onClick={async () => {
+                            await handleDelete(receita.id);
                             setMenuOpen(null);
                           }}
                         >

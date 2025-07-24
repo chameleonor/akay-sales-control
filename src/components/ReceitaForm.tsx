@@ -1,22 +1,17 @@
+import { API_URL } from "@constants";
 import React from "react";
-import { useAtom } from 'jotai';
-import { primarioAtom } from '@stores/primarioAtom';
-import { propriedadesAtom } from '@stores/propriedadesAtom';
-import { corantesAtom } from '@stores/corantesAtom';
-import { essenciasAtom } from '@stores/essenciasAtom';
-import { acabamentosAtom } from '@stores/acabamentosAtom';
-import { embalagensAtom } from '@stores/embalagensAtom';
+
 
 export type Receita = { id: number; nome: string; itens?: ReceitaItem[]; data?: string };
 export type ReceitaItem = { id: number; tipo: string; produtoId: number; quantidade: number };
 
 const TIPOS = [
-  { key: 'primario', label: 'Primário', atom: primarioAtom },
-  { key: 'propriedades', label: 'Propriedades', atom: propriedadesAtom },
-  { key: 'corantes', label: 'Corantes', atom: corantesAtom },
-  { key: 'essencias', label: 'Essências', atom: essenciasAtom },
-  { key: 'acabamentos', label: 'Acabamentos', atom: acabamentosAtom },
-  { key: 'embalagens', label: 'Embalagens', atom: embalagensAtom },
+  { key: 'primario', label: 'Primário' },
+  { key: 'propriedades', label: 'Propriedades' },
+  { key: 'corantes', label: 'Corantes' },
+  { key: 'essencias', label: 'Essências' },
+  { key: 'acabamentos', label: 'Acabamentos' },
+  { key: 'embalagens', label: 'Embalagens' },
 ];
 
 export function ReceitaForm({
@@ -35,24 +30,29 @@ export function ReceitaForm({
       ? receita.itens
       : [{ id: Date.now(), tipo: 'primario', produtoId: 1, quantidade: 1 }]
   );
-  // Atoms para todos os tipos
-  const [primario] = useAtom(primarioAtom);
-  const [propriedades] = useAtom(propriedadesAtom);
-  const [corantes] = useAtom(corantesAtom);
-  const [essencias] = useAtom(essenciasAtom);
-  const [acabamentos] = useAtom(acabamentosAtom);
-  const [embalagens] = useAtom(embalagensAtom);
+
+  // Produtos por tipo vindos da API
+  const [produtosPorTipo, setProdutosPorTipo] = React.useState<Record<string, any[]>>({});
+
+  React.useEffect(() => {
+    async function fetchProdutos() {
+      const tipos = ['primario', 'propriedades', 'corantes', 'essencias', 'acabamentos', 'embalagens'];
+      const result: Record<string, any[]> = {};
+      for (const tipo of tipos) {
+        try {
+          const res = await fetch(`${API_URL}/estoque?tipo=${tipo}`);
+          result[tipo] = res.ok ? await res.json() : [];
+        } catch {
+          result[tipo] = [];
+        }
+      }
+      setProdutosPorTipo(result);
+    }
+    fetchProdutos();
+  }, []);
 
   function getProdutos(tipo: string) {
-    switch (tipo) {
-      case 'primario': return primario;
-      case 'propriedades': return propriedades;
-      case 'corantes': return corantes;
-      case 'essencias': return essencias;
-      case 'acabamentos': return acabamentos;
-      case 'embalagens': return embalagens;
-      default: return [];
-    }
+    return produtosPorTipo[tipo] || [];
   }
 
   function handleSubmit(e: React.FormEvent) {
