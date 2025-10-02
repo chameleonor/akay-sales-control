@@ -68,15 +68,18 @@ export function ReceitaForm({
   }
 
   function handleItemChange(idx: number, field: keyof ReceitaItem, value: string | number) {
-    setItens(itens =>
-      itens.map((item, i) =>
+    console.log('Alterando item:', idx, field, value);
+    setItens(itens => {
+      const newItens = itens.map((item, i) =>
         i === idx
           ? field === 'tipo'
             ? { ...item, tipo: value as string, produtoId: getProdutos(value as string)[0]?.id || 1 }
             : { ...item, [field]: value }
           : item
       )
-    );
+      console.log('Itens atualizados:', newItens);
+      return newItens
+    });
   }
 
   function handleRemoveItem(idx: number) {
@@ -183,7 +186,10 @@ export function ReceitaForm({
                       id={`produto-${item.id}`}
                       className="border rounded px-2 py-1 w-full"
                       value={item.produtoId}
-                      onChange={e => handleItemChange(idx, 'produtoId', Number(e.target.value))}
+                      onChange={e => {
+                        console.log('Alterando produto:', idx, e.target.value);
+                        handleItemChange(idx, 'produtoId', e.target.value);
+                      }}
                     >
                       <option value="">Selecione...</option>
                       {produtos.map(produto => (
@@ -228,7 +234,7 @@ export function ReceitaForm({
                         tabIndex={-1}
                         readOnly
                         value={(function () {
-                          const prod = produtos.find(p => Number(p.id) === Number(item.produtoId));
+                          const prod = produtos.find(p => p.id === item.produtoId);
                           if (!prod || typeof prod.preco !== 'number' || typeof item.quantidade !== 'number') return '-';
                           const val = prod.preco * item.quantidade;
                           return `R$ ${val.toFixed(2)}`;

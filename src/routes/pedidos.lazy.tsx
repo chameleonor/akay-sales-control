@@ -2,6 +2,8 @@ import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css'; // Don't forget to import the CSS!
 import { createLazyFileRoute } from '@tanstack/react-router';
+import { useAtom } from 'jotai';
+
 import { API_URL } from 'constants';
 import { PedidoForm } from '@components/PedidoForm';
 
@@ -37,7 +39,6 @@ const ConfirmToast: React.FC<{
   </div>
 );
 
-
 function RouteComponent() {
   const [receitas, setReceitas] = React.useState<any[]>([]);
   const [produtosPorTipo, setProdutosPorTipo] = React.useState<Record<string, any[]>>({});
@@ -45,7 +46,7 @@ function RouteComponent() {
   const [newOpen, setNewOpen] = React.useState(false);
   const [editPedido, setEditPedido] = React.useState<Pedido | null>(null);
 
-  // Carrega receitas e produtos da API ao montar
+  // Carrega receitas, produtos e pedidos da API ao montar
   React.useEffect(() => {
     fetch(`${API_URL}/receitas`)
       .then(res => res.json())
@@ -63,10 +64,6 @@ function RouteComponent() {
       results.forEach(([tipo, arr]) => { obj[tipo] = arr; });
       setProdutosPorTipo(obj);
     });
-  }, []);
-
-  // Carrega pedidos da API ao montar
-  React.useEffect(() => {
     fetch(`${API_URL}/pedidos`)
       .then(res => res.json())
       .then(setPedidos)
@@ -108,17 +105,25 @@ function RouteComponent() {
 
   const handleDeletePedido = React.useCallback(
     async (pedidoToDelete: Pedido) => {
-      toast.dismiss();
+      // Show the confirmation toast
+      toast.dismiss(); // Dismiss any existing toasts
       toast(
         ({ closeToast }) => (
           <ConfirmToast
             message={`Deseja realmente deletar este item?`}
             onConfirm={async () => {
-              closeToast();
+              closeToast(); // Close the toast
               try {
-                await reverterEstoqueDoPedido(pedidoToDelete);
+                // Reverte estoque antes de deletar
+                reverterEstoqueDoPedido(pedidoToDelete);
+                // Deleta pedido na API
                 const response = await fetch(`${API_URL}/pedidos/${pedidoToDelete.id}`, { method: 'DELETE' });
-                if (!response.ok) throw new Error('Failed to delete order.');
+
+                if (!response.ok) {
+                  throw new Error('Failed to delete order.');
+                }
+
+                // Atualiza lista de pedidos
                 const res = await fetch(`${API_URL}/pedidos`);
                 setPedidos(await res.json());
                 toast.success('Pedido deletado com sucesso!');
@@ -128,18 +133,18 @@ function RouteComponent() {
               }
             }}
             onCancel={() => {
-              closeToast();
+              closeToast(); // Close the toast if cancelled
               toast.info('Operação cancelada.');
             }}
           />
         ),
         {
-          autoClose: false,
-          closeButton: false,
-          draggable: false,
+          autoClose: false, // Don't auto-close, let the buttons handle it
+          closeButton: false, // Don't show the default close button
+          draggable: false, // Prevent dragging
           position: 'top-center',
-          className: 'bg-blue-600 rounded-lg shadow-lg p-4',
-          bodyClassName: 'flex justify-center items-center',
+          className: 'bg-blue-600 rounded-lg shadow-lg p-4', // Tailwind classes for styling
+          bodyClassName: 'flex justify-center items-center', // Center content
           hideProgressBar: true,
         }
       );
@@ -166,7 +171,16 @@ function RouteComponent() {
               const receita = receitas.find(r => r.id === pr.receitaId);
               if (!receita) return acc;
               return acc + (receita.itens || []).reduce((a: number, item: any) => {
-                const produtos = produtosPorTipo[item.tipo] || [];
+                let produtos: any[] = [];
+                switch (item.tipo) {
+                  case 'primario': produtos = produtosPorTipo.primario; break;
+                  case 'propriedades': produtos = produtosPorTipo.propriedades; break;
+                  case 'corantes': produtos = produtosPorTipo.corantes; break;
+                  case 'essencias': produtos = produtosPorTipo.essencias; break;
+                  case 'acabamentos': produtos = produtosPorTipo.acabamentos; break;
+                  case 'embalagens': produtos = produtosPorTipo.embalagens; break;
+                  default: produtos = [];
+                }
                 const prod = produtos.find((p: any) => p.id === item.produtoId);
                 return a + (prod && typeof prod.preco === 'number' && typeof item.quantidade === 'number' ? prod.preco * item.quantidade : 0);
               }, 0);
@@ -204,11 +218,29 @@ function RouteComponent() {
       {(newOpen || editPedido) && (
         <PedidoForm
           receitas={receitas}
-          produtosPorTipo={produtosPorTipo}
+          atoms={produtosPorTipo}
           pedido={editPedido ?? undefined}
           onSave={async p => {
-            await reduzirEstoqueDoPedido(p);
+            reduzirEstoqueDoPedido(p);
+            // Atualiza quantidadeAtual dos produtos das receitas selecionadas
+            p.receitas.forEach(pr => {
+              const receita = receitas.find(r => r.id === pr.receitaId);
+              if (!receita || !receita.itens) return;
+              receita.itens.forEach(item => {
+                // Atualiza quantidadeAtual do produto correspondente
+                const setter = produtosPorTipo[item.tipo];
+                if (!setter) return;
+                setter((produtos: any[]) =>
+                  produtos.map(prod =>
+                    prod.id === item.produtoId
+                      ? { ...prod, quantidadeAtual: Math.max(0, (prod.quantidadeAtual ?? 0) - (item.quantidade ?? 0)) }
+                      : prod
+                  )
+                );
+              });
+            });
             if (editPedido) {
+              // Atualiza pedido via API
               await fetch(`${API_URL}/pedidos/${p.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
@@ -216,6 +248,7 @@ function RouteComponent() {
               });
               toast.success('Pedido atualizado com sucesso!');
             } else {
+              // Salva novo pedido via API
               await fetch(`${API_URL}/pedidos`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
